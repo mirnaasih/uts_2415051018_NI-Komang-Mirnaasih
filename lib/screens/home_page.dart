@@ -1,8 +1,40 @@
 import 'package:flutter/material.dart';
-import 'add_plant_page.dart';
+import 'plant_catalog_page.dart';
+import '../repositories/plant_repository.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final PlantRepository _plantRepository = PlantRepository();
+  int _totalPlants = 0;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchTotalPlants();
+  }
+
+  Future<void> _fetchTotalPlants() async {
+    try {
+      final plants = await _plantRepository.getPlants();
+      if (!mounted) return;
+      setState(() {
+        _totalPlants = plants.length;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,14 +102,20 @@ class HomePage extends StatelessWidget {
                         style: TextStyle(color: Colors.white70, fontSize: 14),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        "1",
-                        style: TextStyle(
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
+                      _isLoading
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                            )
+                          : Text(
+                              "$_totalPlants",
+                              style: const TextStyle(
+                                fontSize: 32,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
                       const SizedBox(height: 4),
                       const Text(
                         "Total Tanaman",
@@ -93,7 +131,17 @@ class HomePage extends StatelessWidget {
                             borderRadius: BorderRadius.circular(20),
                           ),
                         ),
-                        onPressed: () {},
+                        onPressed: () async {
+                          // Tombol "Lihat Semua" sekarang aktif dan membuka halaman katalog
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const PlantCatalogPage(),
+                            ),
+                          );
+                          // Refresh jumlah total tanaman saat kembali dari katalog
+                          _fetchTotalPlants();
+                        },
                         child: const Text("Lihat Semua", style: TextStyle(fontSize: 12)),
                       ),
                     ],
