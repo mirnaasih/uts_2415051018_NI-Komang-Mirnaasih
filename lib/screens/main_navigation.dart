@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'home_page.dart';
 import 'plant_detail_page.dart';
+import 'add_plant_page.dart'; // <-- Tambahkan import ini di bagian atas
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -44,16 +45,11 @@ class _MainNavigationState extends State<MainNavigation> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: const Color(0xFF2E7D32),
         child: const Icon(Icons.add, color: Colors.white),
-        onPressed: () {
-          // Contoh navigasi passing data menuju PlantDetailPage saat tombol tambah ditekan
-          Navigator.push(
+        onPressed: () async {
+          // Navigasi ke Halaman Form Tambah Tanaman
+          final result = await Navigator.push(
             context,
-            MaterialPageRoute(
-              builder: (context) => const PlantDetailPage(
-                plantName: 'Anggrek',
-                plantCategory: 'outdoor',
-              ),
-            ),
+            MaterialPageRoute(builder: (context) => AddPlantPage()),
           );
         },
       ),
