@@ -3,6 +3,7 @@ import 'home_page.dart';
 import 'profile_page.dart';
 import 'add_plant_page.dart';
 import 'plant_catalog_page.dart';
+import 'favorite_plants_page.dart'; 
 
 class MainNavigation extends StatefulWidget {
   const MainNavigation({super.key});
@@ -17,7 +18,7 @@ class _MainNavigationState extends State<MainNavigation> {
   final List<Widget> _screens = [
     const HomePage(),
     const PlantCatalogPage(),
-    const Center(child: Text("Halaman Favorit")),
+    const FavoritePlantsPage(), 
     const ProfilePage(),
   ];
 

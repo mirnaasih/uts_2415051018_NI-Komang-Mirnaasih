@@ -1,12 +1,57 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/plant.dart';
 import 'edit_plant_page.dart';
-import '../repositories/plant_repository.dart'; 
+import '../repositories/plant_repository.dart';
 
-class PlantDetailPage extends StatelessWidget {
+class PlantDetailPage extends StatefulWidget {
   final Plant? plant;
 
   const PlantDetailPage({super.key, this.plant});
+
+  @override
+  State<PlantDetailPage> createState() => _PlantDetailPageState();
+}
+
+class _PlantDetailPageState extends State<PlantDetailPage> {
+  late bool _isFavorite;
+
+  @override
+  void initState() {
+    super.initState();
+    _isFavorite = widget.plant?.isFavorite ?? false;
+  }
+
+  Future<void> _toggleFavorite() async {
+    if (widget.plant != null) {
+      try {
+        final supabase = Supabase.instance.client;
+        setState(() {
+          _isFavorite = !_isFavorite;
+          widget.plant!.isFavorite = _isFavorite;
+        });
+
+        // Update status is_favorite di Supabase
+        await supabase
+            .from('saved_plants')
+            .update({'is_favorite': _isFavorite})
+            .eq('id', widget.plant!.id);
+
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_isFavorite ? 'Ditambahkan ke Favorit' : 'Dihapus dari Favorit'),
+            duration: const Duration(seconds: 1),
+          ),
+        );
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Gagal memperbarui favorit: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,16 +62,20 @@ class PlantDetailPage extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black87),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.pop(context, true),
         ),
         title: const Text(
           'Detail Tanaman',
           style: TextStyle(color: Colors.black87, fontWeight: FontWeight.bold),
         ),
         actions: [
+          // Tombol Ikon Hati (Favorit) yang bisa berubah merah
           IconButton(
-            icon: const Icon(Icons.favorite_border, color: Colors.black87),
-            onPressed: () {},
+            icon: Icon(
+              _isFavorite ? Icons.favorite : Icons.favorite_border,
+              color: _isFavorite ? Colors.red : Colors.black87,
+            ),
+            onPressed: _toggleFavorite,
           ),
           IconButton(
             icon: const Icon(Icons.more_vert, color: Colors.black87),
@@ -46,9 +95,9 @@ class PlantDetailPage extends StatelessWidget {
                 height: 220,
                 width: double.infinity,
                 color: Colors.grey.shade200,
-                child: plant?.imageUrl != null && plant!.imageUrl.isNotEmpty
+                child: widget.plant?.imageUrl != null && widget.plant!.imageUrl.isNotEmpty
                     ? Image.network(
-                        plant!.imageUrl,
+                        widget.plant!.imageUrl,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) =>
                             const Icon(Icons.eco, size: 80, color: Color(0xFF2E7D32)),
@@ -66,7 +115,7 @@ class PlantDetailPage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      plant?.name ?? 'Anggrek',
+                      widget.plant?.name ?? 'Anggrek',
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -75,7 +124,7 @@ class PlantDetailPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      plant?.category ?? 'outdoor',
+                      widget.plant?.category ?? 'outdoor',
                       style: const TextStyle(
                         fontSize: 14,
                         color: Colors.grey,
@@ -92,7 +141,7 @@ class PlantDetailPage extends StatelessWidget {
                           context: context,
                           builder: (context) => AlertDialog(
                             title: const Text('Hapus Tanaman'),
-                            content: Text('Apakah Anda yakin ingin menghapus ${plant?.name ?? 'tanaman ini'}?'),
+                            content: Text('Apakah Anda yakin ingin menghapus ${widget.plant?.name ?? 'tanaman ini'}?'),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context, false),
@@ -106,13 +155,12 @@ class PlantDetailPage extends StatelessWidget {
                           ),
                         );
 
-                        if (confirm == true && plant != null) {
+                        if (confirm == true && widget.plant != null) {
                           try {
                             final repository = PlantRepository();
-                            await repository.deletePlant(plant!.id);
+                            await repository.deletePlant(widget.plant!.id);
 
                             if (!context.mounted) return;
-
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(content: Text('Tanaman berhasil dihapus dari database!')),
                             );
@@ -130,11 +178,11 @@ class PlantDetailPage extends StatelessWidget {
                     IconButton(
                       icon: const Icon(Icons.edit_outlined, color: Colors.grey),
                       onPressed: () async {
-                        if (plant != null) {
+                        if (widget.plant != null) {
                           final result = await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => EditPlantPage(plant: plant!),
+                              builder: (context) => EditPlantPage(plant: widget.plant!),
                             ),
                           );
                           if (result == true) {
@@ -153,10 +201,10 @@ class PlantDetailPage extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                _buildInfoCard(Icons.water_drop_outlined, "Penyiraman", plant?.wateringSchedule ?? "Hari Ini"),
-                _buildInfoCard(Icons.wb_sunny_outlined, "Cahaya", plant?.light ?? "Terang"),
-                _buildInfoCard(Icons.thermostat, "Suhu", plant?.temperature ?? "18-25°C"),
-                _buildInfoCard(Icons.air, "Kelembapan", plant?.humidity ?? "60-70%"),
+                _buildInfoCard(Icons.water_drop_outlined, "Penyiraman", widget.plant?.wateringSchedule ?? "Hari Ini"),
+                _buildInfoCard(Icons.wb_sunny_outlined, "Cahaya", widget.plant?.light ?? "Terang"),
+                _buildInfoCard(Icons.thermostat, "Suhu", widget.plant?.temperature ?? "18-25°C"),
+                _buildInfoCard(Icons.air, "Kelembapan", widget.plant?.humidity ?? "60-70%"),
               ],
             ),
             const SizedBox(height: 24),
@@ -182,7 +230,6 @@ class PlantDetailPage extends StatelessWidget {
     );
   }
 
-  // Widget pembantu untuk 4 kotak informasi kecil
   Widget _buildInfoCard(IconData icon, String title, String value) {
     return Container(
       width: 75,
@@ -213,7 +260,6 @@ class PlantDetailPage extends StatelessWidget {
     );
   }
 
-  // Widget pembantu untuk card pengingat perawatan
   Widget _buildReminderCard(IconData icon, String title, String subtitle) {
     return Container(
       padding: const EdgeInsets.all(16),
