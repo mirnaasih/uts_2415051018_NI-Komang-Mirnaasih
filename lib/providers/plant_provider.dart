@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import '../models/plant.dart';
+import '../services/plant_api_service.dart';
 
 class PlantProvider with ChangeNotifier {
-  // Menyimpan daftar tanaman
-  List<Plant> _plants = [];
+  final PlantApiService _apiService = PlantApiService();
 
-  // Status state
+  List<Plant> _plants = [];
   bool _isLoading = false;
   String _errorMessage = '';
 
@@ -13,49 +13,23 @@ class PlantProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String get errorMessage => _errorMessage;
 
-  // Fungsi simulasi memuat data (nantinya dihubungkan ke API / Supabase)
+  // Fungsi mengambil data dari REST API
   Future<void> fetchPlants() async {
     _isLoading = true;
     _errorMessage = '';
     notifyListeners();
 
     try {
-      // Simulasi delay jaringan
-      await Future.delayed(const Duration(seconds: 1));
-
-      // Data dummy sementara sesuai tema tanaman Anda
-      _plants = [
-        Plant(
-          id: '1',
-          name: 'Anggrek',
-          category: 'outdoor',
-          imageUrl: '',
-          wateringSchedule: 'Hari Ini',
-          light: 'Terang',
-          temperature: '18-25°C',
-          humidity: '60-70%',
-        ),
-        Plant(
-          id: '2',
-          name: 'Monstera',
-          category: 'indoor',
-          imageUrl: '',
-          wateringSchedule: 'Setiap 3 Hari',
-          light: 'Sedang',
-          temperature: '20-28°C',
-          humidity: '70-80%',
-        ),
-      ];
+      _plants = await _apiService.fetchPlantsFromApi();
       _isLoading = false;
       notifyListeners();
     } catch (e) {
       _isLoading = false;
-      _errorMessage = e.toString();
+      _errorMessage = e.toString().replaceAll('Exception: ', '');
       notifyListeners();
     }
   }
 
-  // Fungsi menambah data tanaman (untuk CRUD Create)
   void addPlant(Plant plant) {
     _plants.add(plant);
     notifyListeners();
