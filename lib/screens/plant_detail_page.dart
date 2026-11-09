@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/plant.dart';
 import 'edit_plant_page.dart';
+import '../repositories/plant_repository.dart'; 
 
 class PlantDetailPage extends StatelessWidget {
   final Plant? plant;
@@ -86,8 +87,44 @@ class PlantDetailPage extends StatelessWidget {
                   children: [
                     IconButton(
                       icon: const Icon(Icons.delete_outline, color: Colors.red),
-                      onPressed: () {
-                        // Aksi hapus tanaman
+                      onPressed: () async {
+                        final confirm = await showDialog<bool>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Hapus Tanaman'),
+                            content: Text('Apakah Anda yakin ingin menghapus ${plant?.name ?? 'tanaman ini'}?'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, false),
+                                child: const Text('Batal'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, true),
+                                child: const Text('Hapus', style: TextStyle(color: Colors.red)),
+                              ),
+                            ],
+                          ),
+                        );
+
+                        if (confirm == true && plant != null) {
+                          try {
+                            final repository = PlantRepository();
+                            await repository.deletePlant(plant!.id);
+
+                            if (!context.mounted) return;
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text('Tanaman berhasil dihapus dari database!')),
+                            );
+
+                            Navigator.pop(context, true);
+                          } catch (e) {
+                            if (!context.mounted) return;
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Gagal menghapus: $e'), backgroundColor: Colors.red),
+                            );
+                          }
+                        }
                       },
                     ),
                     IconButton(
@@ -101,12 +138,11 @@ class PlantDetailPage extends StatelessWidget {
                             ),
                           );
                           if (result == true) {
-                            // Kembali ke halaman sebelumnya / refresh jika berhasil edit
                             Navigator.pop(context, true);
                           }
                         }
-  },
-),
+                      },
+                    ),
                   ],
                 ),
               ],
