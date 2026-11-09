@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'providers/plant_provider.dart';
 import 'screens/main_navigation.dart';
 
 void main() {
@@ -10,14 +12,19 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Plant Catalog ',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.green,
-        scaffoldBackgroundColor: const Color(0xFFF9F6F0),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => PlantProvider()),
+      ],
+      child: MaterialApp(
+        title: 'Plant Catalog ',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primarySwatch: Colors.green,
+          scaffoldBackgroundColor: const Color(0xFFF9F6F0),
+        ),
+        home: const MainNavigation(),
       ),
-      home: const MainNavigation(),
     );
   }
 }
