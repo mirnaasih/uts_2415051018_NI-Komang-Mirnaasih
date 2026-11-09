@@ -180,7 +180,7 @@ class _HomePageState extends State<HomePage> {
                       children: const [
                         Icon(Icons.water_drop_outlined, color: Color(0xFF2E7D32)),
                         SizedBox(height: 8),
-                        Text("Siram Monstera", style: TextStyle(fontWeight: FontWeight.bold)),
+                        Text("Siram Tanaman", style: TextStyle(fontWeight: FontWeight.bold)),
                         SizedBox(height: 4),
                         Text("⏱️ 09:00 WITA", style: TextStyle(color: Colors.grey, fontSize: 12)),
                       ],
