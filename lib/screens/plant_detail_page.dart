@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/plant.dart';
+import 'edit_plant_page.dart';
 
 class PlantDetailPage extends StatelessWidget {
   final Plant? plant;
@@ -91,10 +92,21 @@ class PlantDetailPage extends StatelessWidget {
                     ),
                     IconButton(
                       icon: const Icon(Icons.edit_outlined, color: Colors.grey),
-                      onPressed: () {
-                        // Aksi edit tanaman (Milestone 11)
-                      },
-                    ),
+                      onPressed: () async {
+                        if (plant != null) {
+                          final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditPlantPage(plant: plant!),
+                            ),
+                          );
+                          if (result == true) {
+                            // Kembali ke halaman sebelumnya / refresh jika berhasil edit
+                            Navigator.pop(context, true);
+                          }
+                        }
+  },
+),
                   ],
                 ),
               ],
