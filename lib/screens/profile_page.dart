@@ -17,15 +17,16 @@ class ProfilePage extends StatelessWidget {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            const SizedBox(height: 10),
-            Center(
-              child: CircleAvatar(
-                radius: 50,
-                backgroundColor: const Color(0xFF2E7D32),
-                child: const CircleAvatar(
-                  radius: 47,
-                  backgroundColor: Colors.white,
-                  child: Icon(Icons.person, size: 50, color: Color(0xFF2E7D32)),
+          Container(
+              width: 90,
+              height: 90,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.green[50],
+                border: Border.all(color: Colors.green[200]!, width: 2),
+                image: const DecorationImage(
+                  image: AssetImage('assets/images/profil.jpeg'), // Ganti dengan path fotomu di folder assets
+                  fit: BoxFit.cover,
                 ),
               ),
             ),
@@ -42,7 +43,7 @@ class ProfilePage extends StatelessWidget {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Text(
-                "NIM: 2415051018 | Kelas: PTI 4B",
+                "NIM: 2415051018 | Kelas: PTI 5B",
                 style: TextStyle(color: Color(0xFF2E7D32), fontWeight: FontWeight.bold, fontSize: 12),
               ),
             ),
