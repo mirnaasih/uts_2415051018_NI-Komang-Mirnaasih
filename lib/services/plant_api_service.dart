@@ -3,8 +3,8 @@ import 'package:http/http.dart' as http;
 import '../models/plant.dart';
 
 class PlantApiService {
-  // Contoh menggunakan Public API / JSONPlaceholder / Custom Endpoint
-  static const String apiUrl = 'https://jsonplaceholder.typicode.com/posts'; // Ganti dengan API tanaman Anda jika ada
+  
+  static const String apiUrl = 'https://jsonplaceholder.typicode.com/posts'; 
 
   Future<List<Plant>> fetchPlantsFromApi() async {
     try {
